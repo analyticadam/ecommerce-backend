@@ -4,7 +4,8 @@ const dotenv = require("dotenv"); // For managing environment variables
 const cors = require("cors"); // To enable cross-origin resource sharing
 const ebayRoutes = require("./routes/ebayRoutes"); // Import eBay-related routes
 const itemRoutes = require("./routes/itemRoutes"); // Import item routes
-const db = require("./config/conn"); // Database connection
+const adminRoutes = require("./routes/adminRoutes"); //Import admin routes
+const db = require("./config/conn.js"); // Database connection
 
 // Load environment variables from .env file
 dotenv.config();
@@ -19,17 +20,18 @@ const PORT = process.env.PORT || 5000;
 app.use(cors()); // Allow cross-origin requests
 app.use(express.json()); // Parse incoming JSON requests
 
+app.get("/", (req, res) => {
+	res.send("hello");
+});
+
 // Register CRUD routes for items
 app.use("/api/items", itemRoutes);
 
 // Register routes for eBay-related endpoints
 app.use("/api/ebay", ebayRoutes);
 
-// Health check endpoint for monitoring server status
-// Useful for deployment platforms to verify if the server is running
-app.get("/health", (req, res) => {
-	res.status(200).json({ status: "Server is healthy and running!" });
-});
+// Register user route
+app.use("/api/users", adminRoutes);
 
 // Catch-all route for undefined endpoints
 // Helps to handle incorrect API requests gracefully

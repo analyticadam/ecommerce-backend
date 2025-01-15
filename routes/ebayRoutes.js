@@ -1,9 +1,10 @@
 // Import required modules
 const express = require("express"); // Framework for creating routes
-const { searchItems } = require("../services/ebayService"); // eBay service functions
 
 // Create a new router instance
 const router = express.Router();
+
+const { searchItems } = require("../services/ebayService"); // eBay service functions
 
 // GET route to search items on eBay
 // Endpoint: /api/ebay/search
