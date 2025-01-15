@@ -8,7 +8,7 @@ const adminRoutes = require("./routes/adminRoutes"); //Import admin routes
 const db = require("./config/conn.js"); // Database connection
 
 // Load environment variables from .env file
-dotenv.config();
+require("dotenv").config();
 
 // Create an Express application
 const app = express();

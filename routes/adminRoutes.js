@@ -3,6 +3,8 @@ const router = express.Router();
 const { verifyAdmin } = require("../middlewares/authMiddleware"); // Middleware for admin verification
 const adminController = require("../controllers/adminController");
 
+router.get("/", adminController.getUsers);
+
 // this corresponds to regisiter on the frontend because register means add a new user
 router.post("/", adminController.create);
 // this corresponds to login on the frontend

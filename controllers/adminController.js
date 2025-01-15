@@ -1,37 +1,49 @@
-const Users = require("../models/user.js");
 const jwt = require("jsonwebtoken");
+const Users = require("../models/user.js");
 const bcrypt = require("bcrypt");
+
+async function getUsers(req, res) {
+	try {
+		const foundUsers = await Users.find({});
+		res.status(200).json(foundUsers);
+	} catch (err) {
+		res.send(err).status(400);
+	}
+}
 
 async function create(req, res) {
 	try {
-		const createdUser = await Users.create(req.body);
-		const token = createJWT(createdUser);
-		res.status(200).json(token);
+		console.log("Payload received in create:", req.body); // Log the received payload
+		const createdUser = await Users.create(req.body); // Create the user in the database
+		console.log(createdUser);
+		const token = createJWT(createdUser); // Generate a JWT
+		res.status(200).json({ token: token }); // Send the token back to the frontend
 	} catch (err) {
-		res.status(400).json(err);
+		console.log("Error in create:", err); // Log any errors
+		res.status(400).json(err); // Send a 400 response if there's an error
 	}
 }
 
 async function login(req, res) {
-	console.log("login");
+	console.log("login"); // Indicate login flow started
 	try {
-		// query the database to find a user with the email provided
-		const user = await Users.findOne({ username: req.body.username });
-		console.log("Queried username:", req.body.username); // Debug the username being queried
+		console.log("Payload received in login:", req.body); // Log the received payload
+		const user = await Users.findOne({ username: req.body.username }); // Find the user by username
+		console.log("Queried username:", req.body.username); // Debug username
 		console.log("Found user:", user); // Log the found user
-		// if the email does not exsist, throw an error
-		if (!user) throw new Error("User not found");
-		// if we find the user, compare the password, but it is stored encrypted
-		// 1st argument is from the credentials that the user typed in
-		// 2nd arguemtn is what is stored in the database
-		const match = await bcrypt.compare(req.body.password, user.password);
-		console.log("Password match:", match); // Debug if the password matches
-		if (!match) throw new Error("Invalid password");
-		const token = createJWT(user);
-		console.log(token);
-		res.json(token);
+
+		if (!user) throw new Error("User not found"); // If no user, throw error
+		console.log(req.body.password);
+		const match = await bcrypt.compare(req.body.password, user.password); // Compare passwords
+		console.log("Password match:", match); // Debug password match
+		if (!match) throw new Error("Invalid password"); // If passwords don't match, throw error
+
+		const token = createJWT(user); // Generate a JWT
+		console.log("Generated token:", token); // Log the token
+		res.json(token); // Send the token back to the frontend
 	} catch (err) {
-		res.status(400).json(err);
+		console.log("Error in login:", err); // Log any errors
+		res.status(400).json(err); // Send a 400 response if there's an error
 	}
 }
 
@@ -47,4 +59,4 @@ function createJWT(user) {
 	);
 }
 
-module.exports = { create, createJWT, login };
+module.exports = { create, createJWT, login, getUsers };
