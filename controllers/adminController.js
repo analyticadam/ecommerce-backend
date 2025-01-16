@@ -43,7 +43,8 @@ async function login(req, res) {
 		res.json(token); // Send the token back to the frontend
 	} catch (err) {
 		console.log("Error in login:", err); // Log any errors
-		res.status(400).json(err); // Send a 400 response if there's an error
+		res.status(400).json({ message: "Invalid username or password" });
+		// Send a 400 response if there's an error
 	}
 }
 
