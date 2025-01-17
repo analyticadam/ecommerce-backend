@@ -5,6 +5,7 @@ const cors = require("cors"); // To enable cross-origin resource sharing
 const ebayRoutes = require("./routes/ebayRoutes"); // Import eBay-related routes
 const itemRoutes = require("./routes/itemRoutes"); // Import item routes
 const adminRoutes = require("./routes/adminRoutes"); //Import admin routes
+const cartRoutes = require("./routes/cartRoutes"); // Import cart routes
 const db = require("./config/conn.js"); // Database connection
 
 // Load environment variables from .env file
@@ -32,6 +33,9 @@ app.use("/api/ebay", ebayRoutes);
 
 // Register user route
 app.use("/api/users", adminRoutes);
+
+//Register cart route
+app.use("/api/cart", cartRoutes);
 
 // Catch-all route for undefined endpoints
 // Helps to handle incorrect API requests gracefully
