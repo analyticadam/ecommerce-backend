@@ -5,10 +5,11 @@ exports.getCart = async (req, res) => {
 	const { userId } = req.params; // Extract userId from request parameters
 	try {
 		// Find the user's cart and populate product details (only specific fields)
-		const cart = await Cart.findOne({ userId }).populate(
+		let cart = await Cart.findOne({ userId }).populate(
 			"items.productId",
 			"title price"
 		);
+		console.log(cart);
 		res.json(cart); // Return the cart data
 	} catch (error) {
 		// Send a detailed error response for debugging
