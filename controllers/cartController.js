@@ -18,34 +18,30 @@ exports.getCart = async (req, res) => {
 
 // Add an item to the cart
 exports.addItem = async (req, res) => {
-	const { userId, productId, quantity } = req.body; // Extract cart details from request body
+	const { userId } = req.params;
+	const { productId, quantity } = req.body;
+
 	try {
-		// Validate the input data
 		if (!userId || !productId || quantity <= 0) {
 			return res.status(400).json({ error: "Invalid input data" });
 		}
 
 		let cart = await Cart.findOne({ userId });
 		if (cart) {
-			// Check if the product already exists in the cart
 			const itemIndex = cart.items.findIndex(
 				(item) => item.productId.toString() === productId
 			);
 			if (itemIndex > -1) {
-				// Update quantity if the product exists
 				cart.items[itemIndex].quantity += quantity;
 			} else {
-				// Add a new product to the cart if it doesn't exist
 				cart.items.push({ productId, quantity });
 			}
 		} else {
-			// Create a new cart for the user if it doesn't exist
 			cart = new Cart({ userId, items: [{ productId, quantity }] });
 		}
-		await cart.save(); // Save the updated cart to the database
-		res.status(201).send(cart); // Respond with the updated cart
+		await cart.save();
+		res.status(201).send(cart);
 	} catch (error) {
-		// Send an error response
 		res
 			.status(500)
 			.json({ error: "Failed to add item to cart. " + error.message });
@@ -54,37 +50,73 @@ exports.addItem = async (req, res) => {
 
 // Update the quantity of an item in the cart
 exports.updateItem = async (req, res) => {
-	const { id } = req.params; // Extract item ID from request parameters
+	const { userId, itemId } = req.params; // Extract userId and itemId from the request parameters
 	const { quantity } = req.body; // Extract the new quantity from the request body
+
+	// Validate the quantity to ensure it is at least 1
+	if (!quantity || quantity < 1) {
+		return res.status(400).json({ error: "Quantity must be at least 1" });
+	}
+
 	try {
-		// Update the quantity of the specified item
-		const cart = await Cart.findOneAndUpdate(
-			{ "items._id": id },
-			{ $set: { "items.$.quantity": quantity } },
-			{ new: true } // Return the updated cart
-		);
-		res.json(cart); // Respond with the updated cart
+		// Find the user's cart
+		const cart = await Cart.findOne({ userId });
+
+		// If no cart is found, return a 404 response
+		if (!cart) {
+			return res.status(404).json({ error: "Cart not found" });
+		}
+
+		// Find the item in the cart by its itemId
+		const item = cart.items.id(itemId);
+		if (!item) {
+			return res.status(404).json({ error: "Item not found in cart" });
+		}
+
+		// Update the item's quantity
+		item.quantity = quantity;
+
+		// Save the updated cart to the database
+		await cart.save();
+
+		// Return the updated cart
+		res.status(200).json({ message: "Cart updated successfully", cart });
 	} catch (error) {
-		// Send an error response
-		res.status(500).json({ error: "Failed to update item. " + error.message });
+		// Handle any errors and return a 500 status with the error message
+		console.error("Error updating cart:", error);
+		res.status(500).json({ error: "Failed to update cart. " + error.message });
 	}
 };
 
 // Remove an item from the cart
 exports.removeItem = async (req, res) => {
-	const { id } = req.params; // Extract item ID from request parameters
+	const { userId, itemId } = req.params; // Extract item ID from request parameters
+	console.log("userId", userId);
+	console.log("itemId", itemId);
 	try {
-		// Remove the specified item from the cart
-		const cart = await Cart.findOneAndUpdate(
-			{ "items._id": id },
-			{ $pull: { items: { _id: id } } },
-			{ new: true } // Return the updated cart
+		// Find the cart for the given user and remove the specified item
+		const cart = await Cart.findOne({ userId });
+
+		if (!cart) {
+			return res.status(404).json({ error: "Cart not found" });
+		}
+
+		// Filter out the item with the specified item ID
+		const updatedItems = cart.items.filter(
+			(item) => item._id.toString() !== itemId
 		);
-		res.json(cart); // Respond with the updated cart
-	} catch (error) {
-		// Send an error response
-		res
-			.status(500)
-			.json({ error: "Failed to remove item from cart. " + error.message });
+
+		if (cart.items.length === updatedItems.length) {
+			return res.status(404).json({ error: "Item not found in cart" });
+		}
+
+		// Update the cart with the remaining items
+		cart.items = updatedItems;
+		await cart.save();
+
+		res.status(200).json({ message: "Item removed successfully", cart });
+	} catch (err) {
+		console.log("Error removing item from cart:", err);
+		res.status(500).json({ message: "Internal server error" });
 	}
 };
