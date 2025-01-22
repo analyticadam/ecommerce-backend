@@ -11,4 +11,6 @@ router.put("/:userId/:itemId", cartController.updateItem); // Route to update an
 
 router.delete("/:userId/:itemId", cartController.removeItem); // Route to remove item from the user's cart
 
+router.delete("/:userId", cartController.deleteEntireCart); // Route to clear the user's cart
+
 module.exports = router; // Export the router for use in other parts of the application

@@ -1,7 +1,8 @@
-const jwt = require("jsonwebtoken");
 const Users = require("../models/user.js");
+const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
+// Function to get all users
 async function getUsers(req, res) {
 	try {
 		const foundUsers = await Users.find({});
@@ -11,6 +12,7 @@ async function getUsers(req, res) {
 	}
 }
 
+// Function to create a new user
 async function create(req, res) {
 	try {
 		console.log("Payload received in create:", req.body); // Log the received payload
@@ -24,6 +26,7 @@ async function create(req, res) {
 	}
 }
 
+// Function to log in a user
 async function login(req, res) {
 	console.log("login"); // Indicate login flow started
 	try {
