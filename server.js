@@ -26,7 +26,7 @@ app.get("/", (req, res) => {
 });
 
 // Register CRUD routes for items
-app.use("/api/items", itemRoutes);
+app.use("/api/products", itemRoutes);
 
 // Register routes for eBay-related endpoints
 app.use("/api/ebay", ebayRoutes);
